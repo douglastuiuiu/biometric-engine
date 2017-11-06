@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="file" class="ch.qos.logback.core.FileAppender">
+        <file>@app.log.path@</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="gelf" class="me.moocar.logbackgelf.GelfUDPAppender">
+        <remoteHost>192.168.99.193</remoteHost>
+        <port>12201</port>
+        <encoder class="me.moocar.logbackgelf.GZIPEncoder">
+            <layout class="me.moocar.logbackgelf.GelfLayout">
+                <shortMessageLayout class="ch.qos.logback.classic.PatternLayout">
+                    <pattern>%ex{short}%.100m</pattern>
+                </shortMessageLayout>
+                <useLoggerName>true</useLoggerName>
+                <useThreadName>true</useThreadName>
+                <useMarker>true</useMarker>
+                <host>@project.artifactId@</host>
+                <includeFullMDC>true</includeFullMDC>
+                <staticField class="me.moocar.logbackgelf.Field">
+                    <key>application</key>
+                    <value>@project.artifactId@</value>
+                </staticField>
+                <staticField class="me.moocar.logbackgelf.Field">
+                    <key>environment</key>
+                    <value>@build.profile.id@</value>
+                </staticField>
+            </layout>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework" level="@spring.log.level@">
+        <appender-ref ref="@spring.log.appender@"/>
+    </logger>
+
+    <logger name="br.com.douglastuiuiu" level="@app.log.level@" additivity="false">
+        <appender-ref ref="@app.log.appender@"/>
+    </logger>
+
+    <root level="error">
+        <appender-ref ref="@app.log.appender@"/>
+    </root>
+</configuration>

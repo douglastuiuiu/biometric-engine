@@ -1,0 +1,9 @@
+biometric-engine:
+  image: douglastuiuiuoficial/douglastuiuiu-registry:biometric-engine_QA2
+  ports:
+  - 8099:8090/tcp
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label: env=qa2
+  tty: true
+  stdin_open: true

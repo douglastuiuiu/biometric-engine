@@ -1,0 +1,14 @@
+biometric-engine:
+  image: douglastuiuiuoficial/douglastuiuiu-registry:biometric-engine
+  ports:
+  - 8099:8090/tcp
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label: env=app
+  tty: true
+  stdin_open: true
+  
+  # Memory limit 1GB
+  mem_limit: 1073741824
+  # SWAP limit 0.5GB + Memory limit
+  memswap_limit: 1610612736

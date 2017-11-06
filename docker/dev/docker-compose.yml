@@ -1,0 +1,8 @@
+biometric-engine:
+  image: douglastuiuiuoficial/douglastuiuiu-registry:biometric-engine_DEV
+  ports:
+  - 8099:8099/tcp
+  labels:
+    io.rancher.container.pull_image: always
+  tty: true
+  stdin_open: true

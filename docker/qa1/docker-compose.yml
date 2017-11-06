@@ -1,0 +1,9 @@
+address-engine:
+  image: douglastuiuiuoficial/douglastuiuiu-registry:address-engine_QA1
+  ports:
+  - 8099:8090/tcp
+  labels:
+    io.rancher.container.pull_image: always
+    io.rancher.scheduler.affinity:host_label: env=qa1
+  tty: true
+  stdin_open: true

@@ -1,0 +1,512 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "An API for keeping track of your contacts and the companies they work for. \n\nDon't forget to take it for a spin by clicking on the **Try in Person** button next to each operation! All read operations are public and don't require authentication.\n\n<div>\n<img src='https://thecontactsapi.apispark.net/v1/img/cropped-contact-img.png' width='90%'>\n<div>\n\n<!-- ![](https://thecontactsapi.apispark.net/v1/img/cropped-contact-img.png) -->\n\n",
+    "version" : "1.0.0",
+    "title" : "biometric-engine",
+    "termsOfService" : ""
+  },
+  "host" : "localhost:8099",
+  "basePath" : "/api/v1/biometric",
+  "schemes" : [ "http" ],
+  "security" : [ {
+    "HTTP_BASIC" : [ ]
+  } ],
+  "paths" : {
+    "/" : {
+      "post" : {
+        "tags" : [ "Biometric" ],
+        "summary" : "Criar uma solicitacao para análise com os dados do cliente",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "biometricBureauName",
+          "in" : "header",
+          "required" : true,
+          "type" : "string",
+          "description" : "Nome da empresa que a api irá utilizar para verificar biometria."
+        }, {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/AnalyzeRequest"
+          }
+        } ],
+        "responses" : {
+          "201" : {
+            "description" : "Status 201",
+            "schema" : {
+              "$ref" : "#/definitions/AnalyzeResponse"
+            }
+          },
+          "208" : {
+            "description" : "Status 208",
+            "schema" : {
+              "$ref" : "#/definitions/AnalyzeResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          }
+        }
+      }
+    },
+    "/{id}" : {
+      "get" : {
+        "tags" : [ "Biometric" ],
+        "summary" : "Busca uma análise",
+        "description" : "usado para analise do crivo e/ou da mesa",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "biometricBureauName",
+          "in" : "header",
+          "required" : true,
+          "type" : "string",
+          "description" : "Nome da empresa que a api irá utilizar para verificar biometria."
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Quando o status for PROCCESSED ou COMPLETED, deverá carregar as imagens do MINIO e caso elas não sejam encontradas, baixar novamente do motor de biometria",
+            "schema" : {
+              "$ref" : "#/definitions/Analyze"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "delete" : {
+        "summary" : "TEMP - Remove os documentos do minio",
+        "parameters" : [ {
+          "name" : "biometricBureauName",
+          "in" : "header",
+          "required" : true,
+          "type" : "string",
+          "description" : "Nome da empresa que a api irá utilizar para verificar biometria."
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Status 200"
+          }
+        }
+      },
+      "parameters" : [ {
+        "name" : "id",
+        "in" : "path",
+        "required" : true,
+        "type" : "string"
+      } ]
+    },
+    "/{id}/photo" : {
+      "patch" : {
+        "tags" : [ "Biometric" ],
+        "summary" : "Altera/Remove foto da solicitação de análise",
+        "description" : "Atualiza a propriedade foto da solicitação da análise recebendo o base64 da imagem ou null para q o processo siga sem foto.",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "biometricBureauName",
+          "in" : "header",
+          "required" : true,
+          "type" : "string",
+          "description" : "Nome da empresa que a api irá utilizar para verificar biometria."
+        }, {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Photo"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "Quando efetuar a atualização da foto corretamente",
+            "schema" : {
+              "$ref" : "#/definitions/AnalyzeResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "409" : {
+            "description" : "Quando o status enviado no request for diferente de PENDENT",
+            "schema" : {
+              "$ref" : "#/definitions/AnalyzeResponse"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "parameters" : [ {
+        "name" : "id",
+        "in" : "path",
+        "required" : true,
+        "type" : "string"
+      } ]
+    },
+    "/{id}/fraud" : {
+      "post" : {
+        "tags" : [ "Biometric" ],
+        "summary" : "Envia mensagem para bureau informando a fraud",
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "biometricBureauName",
+          "in" : "header",
+          "required" : true,
+          "type" : "string",
+          "description" : "Nome da empresa que a api irá utilizar para verificar biometria."
+        }, {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/Comment"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Quando executar a operação corretamente"
+          },
+          "208" : {
+            "description" : "Quando o status da solicitação de análise ja estiver como COMPLETED"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "parameters" : [ {
+        "name" : "id",
+        "in" : "path",
+        "required" : true,
+        "type" : "string"
+      } ]
+    },
+    "/{id}/documents" : {
+      "post" : {
+        "tags" : [ "Biometric" ],
+        "summary" : "Envia documentos(Base64) para biometria",
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "biometricBureauName",
+          "in" : "header",
+          "required" : true,
+          "type" : "string",
+          "description" : "Nome da empresa que a api irá utilizar para verificar biometria."
+        }, {
+          "name" : "body",
+          "in" : "body",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "Quando executar a operação corretamente"
+          },
+          "208" : {
+            "description" : "Quando o status da solicitação de análise ja estiver como COMPLETED"
+          },
+          "400" : {
+            "description" : "Bad Request",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          },
+          "500" : {
+            "description" : "Internal Server Error",
+            "schema" : {
+              "$ref" : "#/definitions/ErrorModel"
+            }
+          }
+        }
+      },
+      "parameters" : [ {
+        "name" : "id",
+        "in" : "path",
+        "required" : true,
+        "type" : "string"
+      } ]
+    }
+  },
+  "securityDefinitions" : {
+    "HTTP_BASIC" : {
+      "description" : "All GET methods are public, meaning that *you can read all the data*. Write operations require authentication and therefore are forbidden to the general public.",
+      "type" : "basic"
+    }
+  },
+  "definitions" : {
+    "AnalyzeRequest" : {
+      "type" : "object",
+      "required" : [ "establishmentId", "person" ],
+      "properties" : {
+        "consumerType" : {
+          "type" : "string",
+          "description" : "Tipo da operação [CADASTRO_PROPOSTA, ALTERACAO_SENHA, ALTERACAO_LIMITE, EMBOSSING, REABILIZACAO_CONTA]"
+        },
+        "person" : {
+          "$ref" : "#/definitions/Person"
+        },
+        "establishmentId" : {
+          "type" : "string",
+          "description" : "Identificador do estabelecimento (código da loja)"
+        }
+      }
+    },
+    "AnalyzeResponse" : {
+      "type" : "object",
+      "required" : [ "id", "status" ],
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "description" : "Identificador da análise requisitada"
+        },
+        "status" : {
+          "type" : "string",
+          "description" : "Status da análise requisitada [PENDENT, IN_PROGRESS, PROCCESSED, DONE]"
+        },
+        "description" : {
+          "type" : "string",
+          "description" : "Descrição do pendencia quando o Status for PENDENT"
+        },
+        "bureauId" : {
+          "type" : "string",
+          "description" : "identificador da analise no bureau"
+        }
+      }
+    },
+    "Link" : {
+      "type" : "object",
+      "required" : [ "href", "rel" ],
+      "properties" : {
+        "rel" : {
+          "type" : "string",
+          "description" : "identificador do recurso"
+        },
+        "href" : {
+          "type" : "string",
+          "description" : "uri do recurso"
+        }
+      }
+    },
+    "Analyze" : {
+      "type" : "object",
+      "required" : [ "request" ],
+      "properties" : {
+        "request" : {
+          "$ref" : "#/definitions/AnalyzeRequest"
+        },
+        "customer" : {
+          "$ref" : "#/definitions/Person"
+        },
+        "fraud" : {
+          "type" : "array",
+          "description" : "lista de pessoas com match à pessoa da solicitação e setadas como fraude",
+          "items" : {
+            "$ref" : "#/definitions/Person"
+          }
+        },
+        "customerSimilars" : {
+          "type" : "array",
+          "description" : "lista de pessoas com match ao cadastro já encontrado",
+          "items" : {
+            "$ref" : "#/definitions/Person"
+          }
+        },
+        "requestSimilars" : {
+          "type" : "array",
+          "description" : "lista de pessoas com match à solicitação enviada",
+          "items" : {
+            "$ref" : "#/definitions/Person"
+          }
+        },
+        "bureauStatus" : {
+          "type" : "string",
+          "description" : "status do bureau biométrico"
+        },
+        "storageStatus" : {
+          "type" : "string",
+          "description" : "Situação dos arquivos do minio [PURGED, AVAILABLE]"
+        }
+      }
+    },
+    "Person" : {
+      "type" : "object",
+      "required" : [ "birthdate", "cpf", "gender", "isFraud", "name" ],
+      "properties" : {
+        "cpf" : {
+          "type" : "string",
+          "description" : "CPF da pessoa (11 dígitos sem máscara)"
+        },
+        "name" : {
+          "type" : "string",
+          "description" : "Nome da pessoa"
+        },
+        "gender" : {
+          "type" : "string",
+          "description" : "Sexo da pessoa [M, F]"
+        },
+        "birthdate" : {
+          "type" : "string",
+          "description" : "Data de nascimento da pessoa (yyyy-mm-dd)\nex: (2016-09-20)"
+        },
+        "photo" : {
+          "$ref" : "#/definitions/Photo"
+        },
+        "documents" : {
+          "type" : "array",
+          "description" : "Lista de documentos anexados à solicitação de análise",
+          "items" : {
+            "$ref" : "#/definitions/Document"
+          }
+        },
+        "isFraud" : {
+          "type" : "boolean",
+          "description" : "Pessoa setada como fraudador(a)?"
+        },
+        "bureauRegisterDate" : {
+          "type" : "string",
+          "format" : "date",
+          "description" : "data de registro no bureau biométrico"
+        }
+      }
+    },
+    "Photo" : {
+      "type" : "object",
+      "required" : [ "base64" ],
+      "properties" : {
+        "base64" : {
+          "type" : "string",
+          "description" : "Base64 da foto"
+        }
+      }
+    },
+    "Documents" : {
+      "type" : "array",
+      "description" : "Lista de documentos anexados à solicitação de análise",
+      "items" : {
+        "required" : [ "base64", "type" ],
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "description" : "Identificador do tipo de documento\n[RG_FRENTE, RG_VERSO, CPF, PASSAPORTE, CNH ... ]"
+          },
+          "base64" : {
+            "type" : "string",
+            "description" : "Base64 do documento"
+          }
+        }
+      }
+    },
+    "Document" : {
+      "type" : "object",
+      "required" : [ "base64", "type" ],
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "description" : "nome do documento"
+        },
+        "type" : {
+          "type" : "string",
+          "description" : "Identificador do tipo de documento\n[RG_FRENTE, RG_VERSO, CPF, PASSAPORTE, CNH ... ]"
+        },
+        "base64" : {
+          "type" : "string",
+          "description" : "Base64 do documento"
+        },
+        "link" : {
+          "$ref" : "#/definitions/Link"
+        }
+      }
+    },
+    "ErrorModel" : {
+      "type" : "object",
+      "required" : [ "message" ],
+      "properties" : {
+        "message" : {
+          "type" : "string",
+          "description" : "mensagem do erro"
+        }
+      },
+      "description" : ""
+    },
+    "Comment" : {
+      "type" : "object",
+      "required" : [ "message" ],
+      "properties" : {
+        "message" : {
+          "type" : "string"
+        }
+      }
+    }
+  }
+}
